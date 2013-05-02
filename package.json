@@ -1,0 +1,23 @@
+{
+	"main": "index.html",
+	"name": "Clock",
+	"description": "A clock that is sleek and beautiful.",
+	"version": 0.6,
+	"keywords": ["Clock", "Colourful", "Timer"],
+	"window": {
+		"icon": "Clock.png",
+		"toolbar": false,
+		"width": 400,
+		"height": 150,
+		"position": "mouse",
+		"min_width": 400,
+		"min_height": 150,
+		"max_width": 400,
+		"max_height": 150,
+		"frame": false,
+		"show": false
+	},
+	"webkit": {
+		"plugin": false
+	}
+}

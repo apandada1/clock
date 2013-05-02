@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html>
+<title>Clock</title>
+<style>
+@font-face {
+	font-family: OpenSans;
+	src: url("OpenSans-Regular.ttf");
+}
+
+@font-face {
+	font-family: SymbolFont;
+	src: url("WebSymbols-Regular.otf");
+}
+
+.close, .settings, .minimize, .datestring, canvas, .nextback { cursor: default; -webkit-touch-callout: none; -webkit-user-select: none;}
+
+html, body {
+	background: #5133AB; /* No colour specified - dark gray for now */
+	border: rgba(0,0,0,0.2);
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+	-webkit-transition: background-color 300ms ease;
+}
+
+.time, .top {
+	width: 100%;
+	height: 150px;
+	font-family: OpenSans,sans;
+	font-size: 72px;
+	color: #FFFFFF;
+}
+
+.top {
+	margin-bottom: -65px;
+}
+
+.titlebar {
+	border-bottom: 1px solid rgba(0,0,0,0.05);
+	margin-bottom: 15px;
+	text-align: left;
+}
+
+.close {
+	color: #FFFFFF;
+	font-family: SymbolFont;
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	text-align: center;
+	font-size: 12px;
+	line-height: 34px;
+	position: absolute;
+	top: 0;
+	background: rgba(0,0,0,0.05);
+	-webkit-transition: 200ms ease background;
+}
+
+.nextback {
+        color: #FFFFFF;
+        font-family: SymbolFont;
+        height: 30px;
+        width: 30px;
+        display: inline-block;
+        text-align: center;
+        font-size: 12px;
+        line-height: 34px;
+        position: absolute;
+        top: 0;
+	right: 0;
+        background: rgba(0,0,0,0.05);
+        -webkit-transition: 200ms ease background;
+}
+
+.settings {
+        color: #FFFFFF;
+        font-family: SymbolFont;
+        height: 30px;
+        width: 30px;
+        display: inline-block;
+        text-align: center;
+        font-size: 12px;
+        line-height: 30px;
+        position: absolute;
+        top: 60px;
+        background: rgba(0,0,0,0.05);
+        -webkit-transition: 200ms ease background;
+}
+
+.settingstable td {
+	width: 110px;
+	height: 40px;
+	padding: 5px;
+}
+
+.blue {
+	background: #2672EC;	
+}
+
+.purple {
+	background: #5133AB;	
+}
+
+.red {
+	background: #AC193D;
+}
+
+.white {
+	background: #EEEEEE;
+}
+
+.orange {
+	background: #D24726;	
+}
+
+.green {
+	background: #008A00;	
+}
+
+.black {
+	background: #000000;
+}
+
+#ampm {
+	font-size: 14px;
+}
+
+.colorchooser {
+	border: 2px solid rgba(0,0,0,0.1);
+	width: 10px;
+	height: 10px;
+	text-indent:-9999px;
+	display: inline-block;
+}
+
+.settingspane {
+	position: fixed;
+	top:0;
+	bottom:0;
+	right:0;
+	left:30px;
+	background: #111111;
+	font-family: OpenSans;
+	color: white;
+	text-align: left;	
+	padding: 10px;
+	font-size: 10px;
+	margin-top: -5px;
+	display: none;
+}
+
+input[type=checkbox] {
+	outline: 2px solid #000;
+	-webkit-appearance: none;
+	width: 12px;
+	height: 12px;
+	margin: 0 5px 0 0;
+	background: #222222;
+	background-size: 90%;
+	background-repeat: no-repeat;
+	background-position: 50%; 
+}
+
+input[type=checkbox]:checked:before {
+	font-size: 9px;
+	top: -8px;
+	margin-left: 1px;
+	vertical-align: center;
+	font-family: SymbolFont;
+	color: #008A00;
+	content: ".";
+	display: block;
+}
+
+input[type=radio] {
+	outline: 2px solid #000;
+	-webkit-appearance: none;
+	width: 12px;
+	height: 12px;
+	margin: 0 5px 0 0;
+	background: #222222;
+	background-size: 90%;
+	background-repeat: no-repeat;
+	background-position: 50%;
+}
+
+input[type=radio]:checked {
+	background: #008A00;
+	border: 2px solid #222222;
+	outline: 2px solid #000000;
+}
+
+input[type=button] {
+	background: rgba(0,0,0,0.1);
+	padding: 5px;
+	color: #FFFFFF;
+	outline: 2px solid #FFFFFF;
+	text-align: center;
+	font-family: SymbolFont;
+	border: 0;
+	display: inline-block;
+	height: 25px;
+	margin-top: -1px;
+}
+
+input[type=text] {
+	padding: 5px;
+	margin: 15px 0;
+	outline: 2px solid #FFFFFF;
+	border: 0;
+	display: inline-block;
+	color: #FFFFFF;
+	text-align: center;
+}
+
+input[type=text]:selected {
+	outline: 2px solid #FFFFFF;
+	border: 0;
+	color: #FFFFFF;
+}
+
+::-webkit-input-placeholder {
+	color: #AAAAAA;
+}
+
+.minimize {
+	color: #FFFFFF;
+	font-family: SymbolFont;
+	height: 30px;
+	width: 30px;
+	display: inline-block;
+	text-align: center;
+	font-size: 12px;
+	line-height: 30px;
+	position: absolute;
+	top: 30px;
+	background: rgba(0,0,0,0.05);
+	-webkit-transition: 200ms ease background;
+}
+
+.datestring, .timer .bottom {
+	font-size: 14px;	
+}
+
+.drag {
+	-webkit-app-region: drag;
+}
+
+.settingspane p {
+	font-size: 10px;
+}
+
+.settingspane h1 {
+	font-size: 14px;
+}
+
+.desktop {
+	background:-webkit-gradient(
+ linear,
+ left top,
+ right bottom,
+ color-stop(0.12, #AC193E),
+ color-stop(0.2, #D24826),
+ color-stop(0.4, #008A00),
+ color-stop(0.6, #3172C1),
+ color-stop(0.8, #8B0095),
+ color-stop(1, #5133AB)
+ );
+		border:0;
+		width:14px;
+		height:14px;
+		margin-top:-1px;
+		display: inline-block;
+}
+
+.colorbox {
+	margin:0;
+	padding:0;
+	border:0;
+}
+
+.colorbox tr {
+	margin: -5px 0 0 0;
+	padding:0;
+	width: inherit;
+	height:inherit;
+	border:0;
+	display:inline-block;
+}
+
+.colorbox td {
+	margin:0;
+	border:0;
+	padding:0;
+	width:inherit;
+	height:inherit;
+	display:inline-block;
+}
+
+canvas {
+	margin-bottom: -15px;
+}
+
+.close:hover, .minimize:hover, .settings:hover {
+	background: rgba(0,0,0,0.1);
+}
+</style>
+</html>
+<body class="drag" onload="initTime()">
+<div class="titlebar"><div class="close">'</div><div class="minimize">[</div><div class="settings off">S</div><div class="nextback">></div></div>
+<div class="clock time"><canvas id="analogueclock" class="analogue"></canvas><canvas id="polarclock" class="polar" width=100 height=100></canvas><span id="hour" class="digital">00</span><span id="min" class="digital">:00</span><span id="sec" class="digital">:00</span><span id="ampm" class="digital">AM</span>
+<div class="clock datestring">Thursday 1st January 1970</div></div>
+<div class="timer top"><span id="thour">00</span><span id="tmin">:00</span><span id="tsec">:00</span></canvas></div>
+<div class="timer bottom"><input class="timertextbox" type="text" placeholder="HH:MM:SS" ></input><input onClick="timer()" class="timerstartbutton" type="button" value=')'></input><input onClick="timerStop()" type="button" value='&times;'></input></div>
+<div class="settingspane">
+<table class="settingstable" border=0 spacing=5><tr>
+	<td><p><b>Colour Settings:</b></p><table class="colorbox"><tr><td><div class="colorchooser red" onclick="setcolor('red')">Red</div></td><td><div class="colorchooser orange" onclick="setcolor('orange')">Orange</div></td><td><div class="colorchooser green" onclick="setcolor('green')">Green</div></td><td><div class="colorchooser blue" onclick="setcolor('blue')">Blue</div></td></tr><tr><td><div class="colorchooser purple" onclick="setcolor('purple')">Purple</div></td><td><div class="colorchooser black" onclick="setcolor('black')">Black</div></td><td><div class="colorchooser white" onclick="setcolor('white')">White</div></td><td><div class="colorchooser desktop" onclick="setcolor('desktop')">Desktop</div></td></tr></table>
+	<td><p><b>Time Format:</b></p><input type="checkbox" id="cb1" onClick="toggle12hour()"></input>12 hour clock</td>
+	<td><p><b>Show seconds:</b></p><input type="checkbox" id="cb2" onClick="toggleSeconds()"></input>Seconds</td></tr><tr><td colspan=2>
+<p><b>Clock Type</b></p><table style="margin-top:-20px;"><tr><td style="width:100px;">
+<input type="radio" name="clocktype" id="rb1_1" onClick="toggleClocktype('analogue')"></input>Analogue</td><td>
+<input type="radio" name="clocktype" id="rb1_2" onClick="toggleClocktype('digital')"></input>Digital</td><td>
+<input type="radio" name="clocktype" id="rb1_3" onClick="toggleClocktype('polar')"></input>Polar</td>
+</tr></table>
+</td>
+</tr></table>
+</div>
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
+<script type="text/javascript">
+window.requestAnimFrame = (function()
+{
+	return window.requestAnimationFrame		||
+		window.webkitRequestAnimationFrame	||
+		window.mozRequestAnimationFrame		||
+		window.oRequestAnimationFrame		||
+		window.msRequestAnimationFrame		||
+		function(callback)
+		{
+			window.setTimeout(callback, 1000 / 60);
+		};
+})();
+
+function initTime() {
+	gui = require('nw.gui');
+	win = gui.Window.get();
+	win.show();
+	//nope! //win.showDevTools();
+	setInterval(function(){updateTime();}, 1000);
+	$('#rb1_3, #rb1_1, #rb1_2, #cb2, #cb1, .close ,.settings, .colorchooser, .minimize, .nextback, input[type=text], input[type=button]').mouseover(function() {
+		$('body').removeClass('drag');
+	}).mouseout(function() {
+		$('body').addClass('drag');
+	}).click(function() {
+		if ($(this).hasClass("close")) {
+			return win.close()
+		} else if ($(this).hasClass("minimize")) {
+			return win.minimize()
+		} else if ($(this).hasClass("nextback")) {
+			toggleTimerClock();
+		} else if ($(this).hasClass("settings")) {
+			if ($(this).hasClass("off")) {
+				$(this).removeClass('off')
+                $(this).addClass('on')
+				$('.settingspane').css('display','block');
+			} else if ($(this).hasClass("on")) {
+                $(this).removeClass('on')
+                $(this).addClass('off')
+				$('.settingspane').css('display', 'none');
+            }
+		}
+	})
+	if (localStorage.color) {
+		if (localStorage.color == "desktop") {
+			chamelonicBackground();
+		} else {
+			$('body, input[type=text]').css('background','#'+localStorage.color);
+			if (localStorage.color == "EEEEEE") {
+				$('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#111111');
+				$('input[type=text], input[type=button]').css('outline','2px solid #111111');
+			}
+		}
+	} else {
+		localStorage.color = "5133AB";
+	}
+
+	$('.timer').hide();
+
+	if (localStorage.twelvehour) {
+		if (localStorage.twelvehour == "True" || localStorage.type == "Digital") {
+			$('#ampm').show()
+			$('#cb1').attr('checked', true);
+			$('.time').addClass('12hour');
+		} else {
+			$('#ampm').hide()
+			$('#cb1').attr('checked', false);
+			$('.time').addClass('24hour');
+		}
+	} else {
+		localStorage.twelvehour = "False";
+		$('#ampm').hide()
+	}
+	if (localStorage.seconds) {
+		if (localStorage.seconds == "True") {
+			$('.time #sec').show();
+			$('#cb2').attr('checked', true);
+		} else {
+			$('.time #sec').hide();
+			$('#cb2').attr('checked', false);
+		}
+	} else {
+		localStorage.seconds = "True";
+	}
+	if (!localStorage.timerstop) {
+		localStorage.timerstop = "True";
+	}
+	if (localStorage.type) {
+		if (localStorage.type == "Analogue") {
+			$('#rb1_1').attr('checked', true);
+			$('.analogue').show();
+			$('.polar, .digital').hide();
+		} else if (localStorage.type == "Digital") {
+			$('#rb1_2').attr('checked', true);
+			$('.polar, .analogue').hide();
+			$('.digital').show();
+		} else if (localStorage.type == "Polar") {
+			$('#rb1_3').attr('checked', true);
+			$('.digital, .analogue').hide();
+			$('.polar').show();
+		}
+	} else {
+		$('#rb1_2').attr('checked', true);
+		$('.polar, .analogue').hide();
+		$('.digital').show();
+		localStorage.type = "Digital";
+	}
+
+	if (localStorage.tasks) {
+		setInterval(checkTasks, 1000);
+	}
+	drawAnalogueClock();
+	pc = new PolarClock(document.getElementById('polarclock')).start();
+}
+
+function chamelonicBackground() {
+	// Chamelonic Background.
+	if (localStorage.color == "desktop") {
+		try {
+			var exec = require('child_process').exec;
+			exec("xprop -root | grep _GNOME_BACKGROUND_REPRESENTATIVE_COLORS", function(error, stdout, stderr) {
+			if (error === null) {
+				$("body, input[type='text']").css("background-color", stdout.substring(51, stdout.length -2))
+			} else {
+				$("body, input[type='text']").css("background-color", "#444444")
+			}
+			})
+		} catch(err) {
+			console.log("Can't use Chamelonic background feature. Are you on Windows or Linux?")
+		}
+		setTimeout(chamelonicBackground, 1000); // every 1 second, check.
+	}
+}
+
+function timer() {
+	var input = $('.timertextbox').val();
+	var hours = parseInt(input.split(':')[0]);
+	var minutes = parseInt(input.split(':')[1]);
+	var seconds = parseInt(input.split(':')[2]);
+	var TotalSeconds = seconds + (minutes * 60) + (hours * 3600);
+	localStorage.timerstop = "False";
+	Tick(TotalSeconds);
+}	
+
+function timerStop() {
+	localStorage.timerstop = "True";
+}
+
+function Tick(TotalSeconds) {
+	var Seconds = TotalSeconds;
+	
+        var Hours = Math.floor(Seconds / 3600);
+        Seconds -= Hours * (3600);
+
+        var Minutes = Math.floor(Seconds / 60);
+        Seconds -= Minutes * (60);
+
+	console.log(Seconds+" "+Minutes+" "+Hours+" "+TotalSeconds);
+
+        if (Hours<10) {$('#thour').html('0'+Hours);}else{$('#thour').html(Hours);}
+	if (Minutes<10) {$('#tmin').html(':0'+Minutes);}else{$('#tmin').html(':'+Minutes);}
+	if (Seconds<10) {$('#tsec').html(':0'+Seconds);}else{$('#tsec').html(':'+Seconds);}
+
+	TotalSeconds--;
+	if (TotalSeconds == -1) {
+		localStorage.timerstop = "True";
+	}
+	if (localStorage.timerstop == "False") {
+		setTimeout(function() {Tick(TotalSeconds);}, 1000);
+	} else {
+		localStorage.timerstop = "False";
+	}
+}
+
+function checkTasks() {
+	// Integration with Notely, a app in development ;)
+	var tasks = JSON.parse( localStorage.tasks );
+	var status = ['due', 'late', 'done', 'urgent'];
+}
+
+function supportsHTML5Storage() {
+	// We should be able to trust the app, as it's gonna be ran in webkit, gosh! But what if we want to expand to say, Windows? mhm. Baaaaad.
+	try {
+		return 'localStorage' in window && window['localStorage'] !== null;
+	} catch (e) {
+		return false;
+	}
+}
+
+function toggleTimerClock() {
+	if ($('.time').hasClass('hidden')) {
+		$('.nextback').html('&gt;');
+		$('.clock').show();
+		$('.clock').removeClass('hidden');
+		$('.timer').hide();
+		$('.timer').addClass('hidden');
+	} else {
+		$('.nextback').html('&lt;');
+		$('.clock').hide();
+		$('.clock').addClass('hidden');
+		$('.timer').show();
+		$('.timer').removeClass('hidden');
+	}
+}
+
+function toggleSeconds() {
+        if(localStorage.seconds == "True") {
+                $('.time #sec').hide()
+                localStorage.seconds = "False";
+        } else if (localStorage.seconds == "False") {
+                if (localStorage.type == "Analogue" || localStorage.type == "Polar"){
+			$('.time #sec').hide();
+			localStorage.seconds = "True";
+		} else {
+			$('.time #sec').show();
+                	localStorage.seconds = "True";
+		}        
+	}
+}
+
+function toggleClocktype(type) {
+        if(type == 'analogue') {
+                localStorage.type = "Analogue";
+		$('.analogue').show();
+		$('.polar, .digital').hide();
+
+        } else if (type == 'digital') {
+                localStorage.type = "Digital";
+		$('.polar, .analogue').hide();
+		$('.digital').show();
+		if (localStorage.seconds == "True") {
+			$('.time #sec').show()
+		} else {
+			$('.time #sec').hide()
+		}
+        } else if(type == 'polar') {
+                localStorage.type = "Polar";
+		$('.polar').show();
+		$('.analogue, .digital').hide();
+        }
+}
+
+function toggle12hour() {
+	if(localStorage.twelvehour == "True") {
+		$('#ampm').hide()
+		$('.time').removeClass('12hour')
+		$('.time').addClass('24hour')
+		localStorage.twelvehour = "False";
+	} else if (localStorage.twelvehour == "False" && localStorage.type == "Digital") {
+		$('#ampm').show()
+		$('.time').removeClass('24hour')
+                $('.time').addClass('12hour')
+		localStorage.twelvehour = "True";
+	}
+}
+
+function setcolor(color) {
+	if (color == "red") {
+		localStorage.color = "AC193D";
+		$('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+	} else if (color == "orange") {
+                localStorage.color = "D24726";
+                $('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+        } else if (color == "green") {
+                localStorage.color = "008A00";
+                $('body, input[type=text]').css('background','#'+localStorage.color);
+                 $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+	} else if (color == "blue") {
+                localStorage.color = "2672EC";
+                $('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+        } else if (color == "purple") {
+                localStorage.color = "5133AB";
+                $('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+        } else if (color == "black") {
+		localStorage.color = "000000";
+		$('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#FFFFFF');
+		$('input[type=text], input[type=button]').css('outline','2px solid #FFFFFF');
+	} else if (color == "white") {
+                localStorage.color = "EEEEEE";
+                $('body, input[type=text]').css('background','#'+localStorage.color);
+                $('.time, .timer, .datestring, .titlebar, input[type=text], input[type=button]').css('color', '#111111');
+		$('input[type=text], input[type=button]').css('outline','2px solid #111111');
+	} else if (color == "desktop") {
+		console.log("Starting chamelonic background feature.")
+		localStorage.color = "desktop";
+		chamelonicBackground();
+	}
+}
+
+function returnDate(num) {
+        var len = num.length, last_char = num.charAt(len - 1), abbrev
+        if (len == 2 && num.charAt(0) == '1') {
+                abbrev = 'th'
+        } else {
+                if (last_char == '1') {
+                        abbrev = 'st'
+                } else if (last_char == '2') {
+                        abbrev = 'nd'
+                } else if (last_char == '3') {
+                        abbrev = 'rd'
+                } else {
+                        abbrev = 'th'
+                }
+        }
+        return num + '<sup>' + abbrev + '</sup>'
+}
+
+function updateTime() {
+	var time = new Date();
+	var hour = time.getHours();
+	var minu = time.getMinutes();
+	var seco = time.getSeconds();
+	if (hour>=12 && localStorage.twelvehour == "True") {$('#ampm').html('PM');}else{$('#ampm').html('AM');}
+	if (hour>12 && localStorage.twelvehour == "True") {tmphour=hour-12;hour=tmphour;}
+	if (hour<10) {$('#hour').html('0'+hour);}else{$('#hour').html(hour);}
+	if (minu<10) {$('#min').html(':0'+minu);}else{$('#min').html(':'+minu);}
+	if (seco<10) {$('#sec').html(':0'+seco);}else{$('#sec').html(':'+seco);}
+
+	var month = time.getMonth();
+	var day = time.getDay();
+	var date = time.getDate();
+	var datestring = returnDate(date.toString());
+	var year = time.getFullYear();
+	if(day==1){day="Monday";}else 
+	if(day==2){day="Tuesday";}else 
+	if(day==3){day="Wednesday";}else 
+	if(day==4){day="Thursday";}else 	
+	if(day==5){day="Friday";}else 
+	if(day==6){day="Saturday";}else 
+	if(day==0){day="Sunday";}
+	if(month==0){month="January";} else 
+	if(month==1){month="February";} else 
+        if(month==2){month="March";} else
+        if(month==3){month="April";} else
+        if(month==4){month="May";} else 
+        if(month==5){month="June";} else 
+        if(month==6){month="July";} else 
+        if(month==7){month="August";} else 
+        if(month==8){month="September";} else 
+        if(month==9){month="October";} else 
+        if(month==10){month="November";} else 
+        if(month==11){month="December";}
+	$('.datestring').html(day+' '+datestring+' '+month+' '+year) 
+}
+</script><script type="text/javascript">
+function drawAnalogueClock() {
+		var cv = document.getElementById('analogueclock');
+		var cx;
+		if(cv.getContext('2d')){
+			cx = cv.getContext('2d');
+		}
+		var rad = 100;
+		cv.width = cv.height = rad;
+
+		cx.fillStyle = "rgba(255,255,255,0.0)";
+		cx.fillRect(0,0,rad,rad);
+
+		var _clock_face = new(function(ctx,rad){
+			this.radius = rad/2 - 5;
+			this.center = rad/2;
+			this.canvas = ctx;
+
+			this.draw = function () {
+				this.canvas.clearRect(0,0,this.center*2,this.center*2)
+				this.canvas.lineWidth = 4.0;
+				if (localStorage.color == "EEEEEE") { this.canvas.strokeStyle = "#111111"; } else { this.canvas.strokeStyle = "#FFFFFF"; }
+				this.canvas.beginPath();
+				this.canvas.arc(this.center,this.center,this.radius,0,Math.PI *2,true);
+				this.canvas.closePath();
+				this.canvas.stroke();
+			}
+		})(cx,rad);
+		var _second_hand = new(function(ctx,rad,sec){
+			this.sec = sec;
+			this.canvas = ctx;
+			this.center = rad/2;
+			this.size = this.center * 0.8;
+
+			this.update = function(s){
+				this.sec = s;
+			}
+
+			this.draw = function() {
+				the = (6 * Math.PI / 180);
+				x = this.center + this.size * Math.cos(this.sec * the - Math.PI/2);
+				y = this.center + this.size * Math.sin(this.sec * the - Math.PI/2);
+
+				this.canvas.lineWidth = 2.0;
+				if (localStorage.color == "EEEEEE") { this.canvas.strokeStyle = "#FF0000"; } else if (localStorage.color == "000000") { this.canvas.strokeStyle = "#FF0000"; } else { this.canvas.strokeStyle = "#111111"; }
+				this.canvas.lineCap = "round";
+				if (localStorage.seconds == "True") {
+					this.canvas.beginPath();
+					this.canvas.moveTo(x,y);
+					this.canvas.lineTo(this.center,this.center);
+					this.canvas.closePath();
+					this.canvas.stroke();
+				}
+				this.next();
+			}
+
+			this.next = function() {
+				this.sec++;
+				if (this.sec == 60) this.sec==0;
+			}
+		})(cx,rad,0);
+
+		var _hour_hand = new(function(ctx,rad,hrs,min,sec){
+			this.sec = sec;
+			this.min = min;
+			this.hrs = hrs;
+			this.canvas = ctx;
+			this.center = rad/2;
+			this.size = this.center * 0.5;
+
+			this.update = function(h,m,s){
+				this.sec = s;
+				this.min = m;
+				this.hrs = h;
+			}
+
+			this.draw = function(){
+				the = (30 * Math.PI / 180);
+				x = this.center + this.size * Math.cos(((this.hrs + this.min/60 + this.sec/3600) * the) - Math.PI/2);
+				y = this.center + this.size * Math.sin(((this.hrs + this.min/60 + this.sec/3600) * the) - Math.PI/2);
+
+				this.canvas.lineWidth = 2.0;
+				if (localStorage.color == "EEEEEE") { this.canvas.strokeStyle = "#111111"; } else if (localStorage.color == "000000") { this.canvas.strokeStyle = "#FFFFFF"; } else { this.canvas.strokeStyle = "#FFFFFF"; }
+				this.canvas.lineCap = "round";
+
+				this.canvas.beginPath();
+				this.canvas.moveTo(x,y);
+				this.canvas.lineTo(this.center,this.center);
+				this.canvas.closePath();
+				this.canvas.stroke();
+
+				this.next();
+			}
+
+			this.next = function() {
+				this.sec++;
+				if (this.sec==60) {
+					this.min++;
+					this.sec = 0;
+					if (this.min == 60){
+						this.min = 0;
+						this.hrs++;
+						if(this.hrs == 12) {
+							this.hrs = 0;
+						}
+					}
+				}
+			}
+		})(cx,rad,1,0,0);
+
+		var _minute_hand = new(function(ctx,rad,min,sec){
+			this.sec = sec;
+			this.min = min;
+			this.canvas = ctx;
+			this.center = rad/2;
+			this.size = this.center * 0.8;
+
+			this.update = function(m,s){
+				this.sec = s;
+				this.min = m;
+			}
+
+			this.draw = function(){
+				the = (6 * Math.PI / 180);
+				x = this.center + this.size * Math.cos(((this.min + this.sec/60) * the) - Math.PI/2);
+				y = this.center + this.size * Math.sin(((this.min + this.sec/60) * the) - Math.PI/2);
+
+				this.canvas.lineWidth = 2.0;
+				if (localStorage.color == "EEEEEE") { this.canvas.strokeStyle = "#111111"; } else if (localStorage.color == "000000") { this.canvas.strokeStyle = "#FFFFFF"; } else { this.canvas.strokeStyle = "#FFFFFF"; }
+				this.canvas.lineCap = "round";
+
+				this.canvas.beginPath();
+				this.canvas.moveTo(x,y);
+				this.canvas.lineTo(this.center,this.center);
+				this.canvas.closePath();
+				this.canvas.stroke();
+
+				this.next();
+			}
+
+			this.next = function() {
+				this.sec++;
+				if (this.sec==60) {
+					this.min++;
+					this.sec = 0;
+					if (this.min == 60){
+						this.min = 0;
+					}
+				}
+			}
+		})(cx,rad,0,0);
+
+		var _date = new(function(){
+			this.date = new Date();
+			this.hrs = this.date.getHours();
+			this.min = this.date.getMinutes();
+			this.sec = this.date.getSeconds();
+			this.refresh = function(){
+				this.hrs = this.date.getHours();
+				this.min = this.date.getMinutes();
+				this.sec = this.date.getSeconds();
+			}
+		})();
+		var _init = function(){
+			_date.refresh();
+			_second_hand.update(_date.sec);
+			_minute_hand.update(_date.min,_date.sec);
+			_hour_hand.update(_date.hrs,_date.min,_date.sec);	
+		}
+
+		var _clock = function(){
+			_clock_face.draw();
+			_second_hand.draw();
+			_minute_hand.draw();
+			_hour_hand.draw();
+			setTimeout(_clock,1000/1); //1 fps - all we need.
+		}
+
+		_init();
+		_clock();
+}
+</script>
+<script>
+window.requestAnimFrame = (function()
+{
+	return window.requestAnimationFrame		||
+		window.webkitRequestAnimationFrame	||
+		window.mozRequestAnimationFrame		||
+		window.oRequestAnimationFrame		||
+		window.msRequestAnimationFrame		||
+		function(callback)
+		{
+			window.setTimeout(callback, 1000 / 60);
+		};
+})();
+
+Math.deg2rad = function(deg) { return deg * (Math.PI/180); }
+
+var PolarClock = function(canvas)
+{
+	var _sStroke = "#111111", _mStroke = "#FFFFFF", _hStroke = "#FFFFFF";
+	var _dayOfTheWeekStroke = "#FFFFFF", _dayOfTheMonthStroke = "#FFFFFF", _monthStroke = "#FFFFFF";
+
+	var _canvas = canvas, _context, _animation, _radius, _perimeter, _x, _y;
+	var _run = false, _self;
+	var _date, _seconds, _minutes, _hours, _dayOfTheWeek, _dayOfTheMonth, _month;
+	var _strokeWidth = 5, _spacing = 2;
+
+	var _weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+	var _months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+	this.start = function()
+	{
+		if(!_canvas.getContext) return this;
+
+		_context = _canvas.getContext("2d");
+		_context.lineCap = "round";
+		_context.font = "4px Sans-serif";
+
+		_run = true;
+		this.draw();
+		return this;
+	};
+
+	this.stop = function()
+	{
+		_run = false;
+		return this;
+	};
+
+	this.draw = function()
+	{
+		if(!_canvas || !_context) return;
+
+		_self = this;
+		if(_run)
+			requestAnimFrame(function(){ _self.draw(); });
+
+		_date = new Date();
+		_seconds = _date.getSeconds() + (_date.getMilliseconds()/1000);
+		_minutes = _date.getMinutes() + (_seconds/60);
+		_hours = _date.getHours() + (_minutes/60);
+
+		_dayOfTheWeek = _date.getDay() == 0 ? 6 : _date.getDay() - 1; // Make sunday the last day of the week
+		_dayOfTheMonth = _date.getDate();
+		_month = _date.getMonth();
+
+		_context.clearRect(0, 0, _canvas.width, _canvas.height);
+
+		if (localStorage.color == "EEEEEE") { _sStroke = "#FF0000"; _mStroke = "#111111"; } else if (localStorage.color == "000000") { _sStroke = "#FF0000"; _mStroke = "#FFFFFF" } else { _sStroke = "#111111"; _mStroke = "#FFFFFF" }
+		
+
+		if (localStorage.seconds == "True") {
+			this.drawArc(0, (_seconds/60)*360, _sStroke, Math.round(_seconds) + " seconds"); // Seconds
+		}
+		this.drawArc(1, (_minutes/60)*360, _mStroke, Math.round(_minutes) + " minutes"); // Minutes
+		this.drawArc(2, ((_hours >= 13 ? _hours-12 : _hours)/12)*360, _mStroke, Math.round(_hours) + " hours"); // Hours
+
+		this.drawArc(4, (_dayOfTheWeek/6)*360, _mStroke, _weekDays[_dayOfTheWeek]); // Day of the week
+
+		var dayOfTheMonthSuffix;
+		if(_dayOfTheMonth == 1) dayOfTheMonthSuffix = "st";
+		else if(_dayOfTheMonth == 2) dayOfTheMonthSuffix = "nd";
+		else if(_dayOfTheMonth == 3) dayOfTheMonthSuffix = "rd";
+		else dayOfTheMonthSuffix = "th";
+
+		this.drawArc(5, (_dayOfTheMonth/31)*360, _mStroke, _dayOfTheMonth + dayOfTheMonthSuffix); // Day of the month
+		this.drawArc(6, (_month/11)*360, _mStroke, _months[_month]); // Month
+	};
+
+	this.drawArc = function(offset, angle, strokeStyle, label)
+	{
+		_radius = (_canvas.width/2) - (_strokeWidth/2) - (_strokeWidth*offset) - (_spacing*offset);
+
+		_perimeter = 2 * Math.PI * _radius;
+//		var minWidthAngle = (_context.measureText(label).width / _perimeter) * 360;
+//		if(angle < minWidthAngle)
+//			angle = minWidthAngle;
+
+		_context.strokeStyle = strokeStyle;
+		_context.lineWidth = _strokeWidth;
+		_context.beginPath();
+		_context.arc(_canvas.width/2, _canvas.height/2, _radius, Math.deg2rad(-90), Math.deg2rad(-90 + angle), false);
+		_context.stroke();
+		_context.closePath();
+
+//		this.drawText(label, angle, _radius, _perimeter);
+	};
+
+	this.drawText = function(text, angle, radius, perimeter)
+	{
+		_context.fillStyle = "#FFFFFF";
+		_context.textBaseline = "middle";
+
+		var angleDiff = ((_context.measureText(text).width / _perimeter) * 360) * -1;
+
+		for(i=0;i<text.length;i++)
+		{
+			_x = Math.cos(Math.deg2rad(-90 + angle + angleDiff )) * radius + _canvas.width/2;
+			_y = Math.sin(Math.deg2rad(-90 + angle + angleDiff )) * radius + _canvas.height/2;
+
+			_context.save();
+			_context.translate(_x, _y);
+			_context.rotate(Math.deg2rad(angle + angleDiff));
+			_context.fillText(text[i], 0, 0);
+			_context.restore();
+
+			angleDiff += (_context.measureText(text[i]).width / _perimeter) * 360;
+		}
+	};
+}
+</script></body> </html>
